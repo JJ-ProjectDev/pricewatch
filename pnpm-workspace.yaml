@@ -1,0 +1,9 @@
+packages:
+  - "services/*"
+
+onlyBuiltDependencies:
+  - "@nestjs/core"
+  - esbuild
+allowBuilds:
+  '@nestjs/core': true
+  esbuild: true

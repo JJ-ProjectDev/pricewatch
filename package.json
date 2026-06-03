@@ -1,0 +1,12 @@
+{
+  "name": "pricewatch",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.5.1",
+  "scripts": {
+    "build": "pnpm --recursive run build",
+    "dev:web": "pnpm --filter @pricewatch/web run dev",
+    "dev:api": "pnpm --filter @pricewatch/api-gateway run start:dev",
+    "test": "pnpm --recursive run test"
+  }
+}

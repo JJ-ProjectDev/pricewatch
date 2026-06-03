@@ -1,0 +1,10 @@
+node_modules
+dist
+*.tsbuildinfo
+.git
+.pnpm-data
+.pnpm-home
+.pnpm-store
+.env
+.env.local
+coverage
