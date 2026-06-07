@@ -11,6 +11,8 @@ RUN pnpm install --filter @pricewatch/api-gateway --frozen-lockfile
 COPY services/api-gateway services/api-gateway
 
 WORKDIR /repo/services/api-gateway
+RUN pnpm exec prisma generate
+
 EXPOSE 3000
 
 CMD ["pnpm", "run", "start:dev"]
