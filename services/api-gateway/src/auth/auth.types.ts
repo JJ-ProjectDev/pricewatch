@@ -16,3 +16,8 @@ export interface JwtPayload {
   email: string;
   displayName: string;
 }
+
+export interface LoginResponse {
+  accessToken: string;
+  user: AuthenticatedUser;
+}
