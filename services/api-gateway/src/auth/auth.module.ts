@@ -5,6 +5,7 @@ import { DatabaseModule } from '../database/database.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { getJwtModuleOptions } from './jwt.config';
+import { LocalStrategy } from './local.strategy';
 import { PasswordHashingService } from './password-hashing.service';
 
 @Module({
@@ -16,7 +17,7 @@ import { PasswordHashingService } from './password-hashing.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PasswordHashingService],
+  providers: [AuthService, PasswordHashingService, LocalStrategy],
   exports: [AuthService, PasswordHashingService],
 })
 export class AuthModule {}
