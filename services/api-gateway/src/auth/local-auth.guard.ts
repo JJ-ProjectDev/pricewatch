@@ -9,6 +9,7 @@ export class LocalAuthGuard extends AuthGuard('local') {
   canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<{ body?: unknown }>();
     const dto = plainToInstance(LoginUserDto, request.body ?? {});
+    // Guards run before pipes, so validate login shape here for 400 responses.
     const errors = validateSync(dto, { whitelist: true });
 
     if (errors.length > 0) {

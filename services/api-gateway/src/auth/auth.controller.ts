@@ -15,6 +15,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   login(@Request() request: { user: SafeUser }, @Body() _dto: LoginUserDto): LoginResponseDto {
+    // LocalAuthGuard validates credentials before the handler signs a token.
     return this.authService.login(request.user);
   }
 

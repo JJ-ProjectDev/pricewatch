@@ -13,6 +13,7 @@ import { PasswordHashingService } from './password-hashing.service';
   imports: [
     DatabaseModule,
     PassportModule,
+    // JWT config stays environment-driven so secrets never live in code.
     JwtModule.registerAsync({
       useFactory: getJwtModuleOptions,
     }),

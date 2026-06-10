@@ -16,6 +16,7 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<SafeUser | null> {
+    // Normalize email so login matches registration storage.
     const user = await this.prisma.user.findUnique({
       where: { email: email.toLowerCase() },
     });
@@ -24,6 +25,7 @@ export class AuthService {
       return null;
     }
 
+    // Only compare against the stored Argon2id hash.
     const isPasswordValid = await this.passwordHashingService.verify(user.passwordHash, password);
 
     if (!isPasswordValid) {
@@ -34,6 +36,7 @@ export class AuthService {
   }
 
   login(user: SafeUser): LoginResponse {
+    // Keep the JWT payload small and free of database-only fields.
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -83,6 +86,7 @@ export class AuthService {
   }
 
   private toSafeUser(user: User): SafeUser {
+    // Centralize response shaping so passwordHash cannot leak.
     return {
       id: user.id,
       email: user.email,

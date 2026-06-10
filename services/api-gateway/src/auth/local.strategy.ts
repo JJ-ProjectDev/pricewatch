@@ -13,6 +13,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(email: string, password: string): Promise<SafeUser> {
+    // Delegate credential checks so password logic stays in AuthService.
     const user = await this.authService.validateUser(email, password);
 
     if (!user) {
