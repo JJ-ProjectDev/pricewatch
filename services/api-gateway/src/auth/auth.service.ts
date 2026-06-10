@@ -1,6 +1,8 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { JwtService } from '@nestjs/jwt';
+import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
+import { JwtPayload, LoginResponse, SafeUser } from './auth.types';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { RegisterUserResponseDto } from './dto/register-user-response.dto';
 import { PasswordHashingService } from './password-hashing.service';
@@ -10,7 +12,46 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly passwordHashingService: PasswordHashingService,
+    private readonly jwtService: JwtService,
   ) {}
+
+  async validateUser(email: string, password: string): Promise<SafeUser | null> {
+    // Normalize email so login matches registration storage.
+    const user = await this.prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    // Only compare against the stored Argon2id hash.
+    const isPasswordValid = await this.passwordHashingService.verify(user.passwordHash, password);
+
+    if (!isPasswordValid) {
+      return null;
+    }
+
+    return this.toSafeUser(user);
+  }
+
+  login(user: SafeUser): LoginResponse {
+    // Keep the JWT payload small and free of database-only fields.
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      displayName: user.displayName,
+    };
+
+    return {
+      accessToken: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+      },
+    };
+  }
 
   async register(dto: RegisterUserDto): Promise<RegisterUserResponseDto> {
     const email = dto.email.toLowerCase();
@@ -34,12 +75,7 @@ export class AuthService {
         },
       });
 
-      return {
-        id: user.id,
-        email: user.email,
-        displayName: user.displayName,
-        createdAt: user.createdAt,
-      };
+      return this.toSafeUser(user);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
         throw new ConflictException('Email already registered');
@@ -47,5 +83,15 @@ export class AuthService {
 
       throw error;
     }
+  }
+
+  private toSafeUser(user: User): SafeUser {
+    // Centralize response shaping so passwordHash cannot leak.
+    return {
+      id: user.id,
+      email: user.email,
+      displayName: user.displayName,
+      createdAt: user.createdAt,
+    };
   }
 }

@@ -1,4 +1,5 @@
 import { ConflictException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { PasswordHashingService } from './password-hashing.service';
 
@@ -11,7 +12,8 @@ describe('AuthService', () => {
       create: jest.Mock;
     };
   };
-  let passwordHashingService: Pick<PasswordHashingService, 'hash'>;
+  let passwordHashingService: Pick<PasswordHashingService, 'hash' | 'verify'>;
+  let jwtService: Pick<JwtService, 'sign'>;
   let service: AuthService;
 
   beforeEach(() => {
@@ -23,8 +25,16 @@ describe('AuthService', () => {
     };
     passwordHashingService = {
       hash: jest.fn().mockResolvedValue('$argon2id$hashed-password'),
+      verify: jest.fn(),
     };
-    service = new AuthService(prisma as never, passwordHashingService as PasswordHashingService);
+    jwtService = {
+      sign: jest.fn().mockReturnValue('signed-token'),
+    };
+    service = new AuthService(
+      prisma as never,
+      passwordHashingService as PasswordHashingService,
+      jwtService as JwtService,
+    );
   });
 
   it('persists a registered user with a password hash', async () => {
@@ -76,5 +86,81 @@ describe('AuthService', () => {
     ).rejects.toBeInstanceOf(ConflictException);
 
     expect(prisma.user.create).not.toHaveBeenCalled();
+  });
+
+  it('returns a safe user for valid credentials', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'user-id',
+      email: 'user@example.com',
+      displayName: 'Example',
+      passwordHash: '$argon2id$hashed-password',
+      createdAt,
+      updatedAt: createdAt,
+    });
+    passwordHashingService.verify = jest.fn().mockResolvedValue(true);
+
+    const result = await service.validateUser('USER@example.com', 'StrongPassword123!');
+
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { email: 'user@example.com' },
+    });
+    expect(passwordHashingService.verify).toHaveBeenCalledWith(
+      '$argon2id$hashed-password',
+      'StrongPassword123!',
+    );
+    expect(result).toEqual({
+      id: 'user-id',
+      email: 'user@example.com',
+      displayName: 'Example',
+      createdAt,
+    });
+    expect(result).not.toHaveProperty('passwordHash');
+  });
+
+  it('returns null when the user does not exist', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+
+    await expect(service.validateUser('missing@example.com', 'StrongPassword123!')).resolves.toBeNull();
+
+    expect(passwordHashingService.verify).not.toHaveBeenCalled();
+  });
+
+  it('returns null when the password is invalid', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'user-id',
+      email: 'user@example.com',
+      displayName: 'Example',
+      passwordHash: '$argon2id$hashed-password',
+      createdAt,
+      updatedAt: createdAt,
+    });
+    passwordHashingService.verify = jest.fn().mockResolvedValue(false);
+
+    await expect(service.validateUser('user@example.com', 'WrongPassword123!')).resolves.toBeNull();
+  });
+
+  it('returns a signed access token for a safe user', () => {
+    const result = service.login({
+      id: 'user-id',
+      email: 'user@example.com',
+      displayName: 'Example',
+      createdAt,
+    });
+
+    expect(jwtService.sign).toHaveBeenCalledWith({
+      sub: 'user-id',
+      email: 'user@example.com',
+      displayName: 'Example',
+    });
+    expect(result).toEqual({
+      accessToken: 'signed-token',
+      user: {
+        id: 'user-id',
+        email: 'user@example.com',
+        displayName: 'Example',
+      },
+    });
+    expect(result).not.toHaveProperty('passwordHash');
+    expect(result.user).not.toHaveProperty('passwordHash');
   });
 });
