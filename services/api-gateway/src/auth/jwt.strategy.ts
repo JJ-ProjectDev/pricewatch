@@ -8,6 +8,7 @@ import { getJwtSecret } from './jwt.config';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
+      // Accept only standard Authorization: Bearer tokens.
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: getJwtSecret(),
@@ -15,6 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: JwtPayload): AuthenticatedUser {
+    // Passport attaches this safe user object to request.user.
     return {
       id: payload.sub,
       email: payload.email,
