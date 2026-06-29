@@ -15,7 +15,6 @@ import { LoginUserDto } from './dto/login-user.dto'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { RegisterUserResponseDto } from './dto/register-user-response.dto'
 import { LocalAuthGuard } from './local-auth.guard'
-import { AuthGuard } from '@nestjs/passport'
 import { JwtAuthGuard } from './jwt-auth.guard'
 
 @Controller('auth')

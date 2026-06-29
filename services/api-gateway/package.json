@@ -10,7 +10,9 @@
     "prestart:dev": "prisma migrate deploy --schema prisma/schema.prisma && prisma generate --schema prisma/schema.prisma",
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
-    "test": "jest --passWithNoTests"
+    "test": "jest --passWithNoTests",
+    "db:seed": "ts-node prisma/seed.ts",
+    "test:integration": "pnpm --filter @pricewatch/api-gateway test:integration"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",
@@ -44,6 +46,9 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "jest": {
     "moduleFileExtensions": [
       "js",
@@ -51,7 +56,7 @@
       "ts"
     ],
     "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "testRegex": ".*\\.(spec|integration-spec)\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
