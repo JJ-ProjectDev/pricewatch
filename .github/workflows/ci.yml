@@ -15,6 +15,7 @@ jobs:
       JWT_SECRET: pricewatch_ci_jwt_secret
       JWT_EXPIRES_IN: 15m
 
+    # API integration tests boot the real Nest app and need PostgreSQL.
     services:
       postgres:
         image: postgres:16-alpine

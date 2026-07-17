@@ -94,8 +94,9 @@ async function main() {
     },
   });
 
-  console.log('✅ Test user seeded');
+  console.log('Test user seeded');
 
+  // Upserts keep the seed repeatable for local development and CI.
   for (const product of products) {
     await prisma.product.upsert({
       where: { name: product.name },
@@ -108,7 +109,7 @@ async function main() {
     });
   }
 
-  console.log(`✅ ${products.length} products seeded`);
+  console.log(`${products.length} products seeded`);
 }
 
 main()
