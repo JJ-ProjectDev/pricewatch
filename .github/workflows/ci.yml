@@ -10,6 +10,25 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://pricewatch:pricewatch_dev_password@localhost:5432/pricewatch
+      JWT_SECRET: pricewatch_ci_jwt_secret
+      JWT_EXPIRES_IN: 15m
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: pricewatch
+          POSTGRES_USER: pricewatch
+          POSTGRES_PASSWORD: pricewatch_dev_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pricewatch -d pricewatch"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout
@@ -30,6 +49,12 @@ jobs:
 
       - name: Build workspaces
         run: pnpm build
+
+      - name: Apply database migrations
+        run: pnpm --filter @pricewatch/api-gateway run prisma:migrate:deploy
+
+      - name: Seed test database
+        run: pnpm --filter @pricewatch/api-gateway run db:seed
 
       - name: Run tests
         run: pnpm test
