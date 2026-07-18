@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common'
 import { PassportModule } from '@nestjs/passport'
 import { Test } from '@nestjs/testing'
-import * as request from 'supertest'
+import request = require('supertest')
 import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
 import { LocalStrategy } from './local.strategy'
