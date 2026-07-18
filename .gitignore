@@ -8,6 +8,7 @@ dist
 .env.local
 .vscode/
 .idea/
+docs/localdev/
 coverage
 .DS_Store
 npm-debug.log*
