@@ -6,7 +6,7 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
 
 function App() {
   return (
-    <main className="app-shell">
+    <main className="app-shell ">
       <section className="status-panel">
         <p className="eyebrow">Iteration 1 Foundation</p>
         <h1>PriceWatch</h1>
