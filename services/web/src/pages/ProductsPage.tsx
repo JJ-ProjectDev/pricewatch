@@ -8,14 +8,8 @@ import {
   CardHeader
 } from '@/components/ui/card'
 import { Link } from 'react-router-dom'
+import { Product } from '@/lib/types'
 
-interface Product {
-  id: string
-  name: string
-  description: string
-  imageUrl: string
-  createdAt: string
-}
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -25,7 +19,7 @@ export default function ProductsPage() {
   useEffect(() => {
     api
       .get('/products')
-      .then((responce) => setProducts(responce.data))
+      .then((response) => setProducts(response.data))
       .catch((err) => setError(err))
       .finally(() => setLoading(false))
   }, [])
