@@ -17,7 +17,7 @@ export interface JwtPayload {
   displayName: string;
 }
 
-export interface LoginResponse {
+export interface LoginResult {
   accessToken: string;
   user: AuthenticatedUser;
 }

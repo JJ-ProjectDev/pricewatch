@@ -2,7 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
-import { JwtPayload, LoginResponse, SafeUser } from './auth.types';
+import { JwtPayload, LoginResult, SafeUser } from './auth.types';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { RegisterUserResponseDto } from './dto/register-user-response.dto';
 import { PasswordHashingService } from './password-hashing.service';
@@ -35,7 +35,7 @@ export class AuthService {
     return this.toSafeUser(user);
   }
 
-  login(user: SafeUser): LoginResponse {
+  login(user: SafeUser): LoginResult {
     // Keep the JWT payload small and free of database-only fields.
     const payload: JwtPayload = {
       sub: user.id,

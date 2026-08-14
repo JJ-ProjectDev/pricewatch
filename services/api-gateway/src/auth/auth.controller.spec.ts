@@ -111,7 +111,7 @@ describe('AuthController', () => {
     expect(authService.register).not.toHaveBeenCalled()
   })
 
-  it('returns 200 and an access token for successful login', async () => {
+  it('returns 200 and sets an access token cookie for successful login', async () => {
     authService.validateUser.mockResolvedValue(safeUser)
     authService.login.mockReturnValue({
       accessToken: 'signed-token',
@@ -136,15 +136,37 @@ describe('AuthController', () => {
     )
     expect(authService.login).toHaveBeenCalledWith(safeUser)
     expect(response.body).toEqual({
-      accessToken: 'signed-token',
       user: {
         id: 'user-id',
         email: 'user@example.com',
         displayName: 'Example'
       }
     })
+    expect(response.headers['set-cookie']).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          'access_token=signed-token; Path=/; HttpOnly; SameSite=Lax'
+        )
+      ])
+    )
+    expect(response.body).not.toHaveProperty('accessToken')
     expect(response.body).not.toHaveProperty('passwordHash')
     expect(response.body.user).not.toHaveProperty('passwordHash')
+  })
+
+  it('returns 200 and clears the access token cookie on logout', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/auth/logout')
+      .expect(200)
+
+    expect(response.body).toEqual({})
+    expect(response.headers['set-cookie']).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          'access_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax'
+        )
+      ])
+    )
   })
 
   it('returns 401 for an invalid password', async () => {
