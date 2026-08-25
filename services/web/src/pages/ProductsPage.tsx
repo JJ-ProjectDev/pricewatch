@@ -7,9 +7,9 @@ import {
   CardTitle,
   CardHeader
 } from '@/components/ui/card'
+import { WatchButton } from '@/components/watchlist/WatchButton'
 import { Link } from 'react-router-dom'
 import { Product } from '@/lib/types'
-
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -41,6 +41,7 @@ export default function ProductsPage() {
                 </CardHeader>
                 <CardContent>
                   <img src={product.imageUrl} alt={product.name} />
+                  <WatchButton productId={product.id} />
                 </CardContent>
               </Card>
             </Link>

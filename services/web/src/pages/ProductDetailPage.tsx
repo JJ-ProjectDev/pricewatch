@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { WatchButton } from '@/components/watchlist/WatchButton'
 import api from '@/lib/api'
 import { Product } from '@/lib/types'
 import { Link } from 'react-router-dom'
@@ -37,6 +38,7 @@ export default function ProductDetailPage() {
           <h1>{product.name}</h1>
           <p>{product.description}</p>
           <img src={product.imageUrl} alt={`product ${product.name}`} />
+          <WatchButton productId={product.id} />
           <Link
             to="/products"
             className={buttonVariants({ variant: 'outline' })}
