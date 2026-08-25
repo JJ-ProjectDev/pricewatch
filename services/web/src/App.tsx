@@ -8,6 +8,7 @@ import Layout from './components/layout/Layout'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import WatchlistPage from './pages/WatchlistPage'
 
 export default function App() {
   return (
@@ -18,7 +19,9 @@ export default function App() {
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route element={<ProtectedRoute />}> {/* watchlist here */}</Route>
+        <Route element={<ProtectedRoute />}>
+          <Route path="/watchlist" element={<WatchlistPage />} />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
