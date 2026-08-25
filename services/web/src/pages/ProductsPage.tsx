@@ -18,7 +18,7 @@ export default function ProductsPage() {
 
   useEffect(() => {
     api
-      .get('/products')
+      .get<Product[]>('/products')
       .then((response) => setProducts(response.data))
       .catch((err) => setError(err))
       .finally(() => setLoading(false))
