@@ -1,5 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import cookieParser = require('cookie-parser');
 import { AppModule } from '../app.module';
 
 /**
@@ -10,11 +11,15 @@ import { AppModule } from '../app.module';
  * are active — you are testing the actual auth flow, not a mock.
  */
 export async function createTestApp(): Promise<INestApplication> {
+  process.env.JWT_SECRET ??= 'pricewatch-integration-test-secret';
+
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();
 
   const app = moduleFixture.createNestApplication();
+
+  app.use(cookieParser());
 
   // Mirror exactly what your main.ts does so validation behaves identically
   app.useGlobalPipes(

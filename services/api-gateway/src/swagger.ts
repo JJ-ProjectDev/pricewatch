@@ -11,13 +11,14 @@ export function setupSwagger(app: INestApplication): void {
     .addTag('Health', 'Service availability checks')
     .addTag('Authentication', 'Registration, login, and authenticated profiles')
     .addTag('Products', 'Product catalogue queries')
-    .addBearerAuth(
+    .addCookieAuth(
+      'access_token',
       {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
+        type: 'apiKey',
+        in: 'cookie',
+        description: 'JWT access token set by POST /auth/login.',
       },
-      'access-token',
+      'access-token-cookie',
     )
     .build();
 

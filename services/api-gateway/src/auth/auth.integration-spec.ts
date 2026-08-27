@@ -1,166 +1,140 @@
-import { INestApplication } from '@nestjs/common'
-import * as request from 'supertest'
-import { createTestApp, TEST_USER } from './auth.test-utils'
-
-// ---------------------------------------------------------------------------
-// Test Suite: Authentication Endpoints
-// Issue #23 — PriceWatch
-// ---------------------------------------------------------------------------
+import { INestApplication } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as request from 'supertest';
+import { createTestApp, TEST_USER } from './auth.test-utils';
 
 describe('Auth Integration Tests', () => {
-  let app: INestApplication
+  let app: INestApplication;
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
-
-  /**
-   * beforeAll runs ONCE before any test in this file.
-   * Booting NestJS is slow (~1-2s), so we do it once and reuse the instance
-   * across all tests rather than restarting for each one.
-   */
   beforeAll(async () => {
-    app = await createTestApp()
-  })
+    app = await createTestApp();
+  });
 
-  /**
-   * afterAll runs ONCE after every test has finished.
-   * Closes the HTTP server so Jest can exit cleanly.
-   */
   afterAll(async () => {
-    await app.close()
-  })
-
-  // ── POST /auth/login ───────────────────────────────────────────────────────
+    await app.close();
+  });
 
   describe('POST /auth/login', () => {
-    // ── Acceptance Criterion 1: Successful login ───────────────────────────
-    it('should return 200 and an access_token on valid credentials', async () => {
+    it('returns the user and sets an httpOnly access token cookie', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
           email: TEST_USER.email,
-          password: TEST_USER.password
+          password: TEST_USER.password,
         })
+        .expect(200);
 
-      // HTTP status must be 200
-      expect(response.status).toBe(200)
+      expect(response.body).toEqual({
+        user: {
+          id: expect.any(String),
+          email: TEST_USER.email,
+          displayName: TEST_USER.displayName,
+        },
+      });
+      expect(response.body).not.toHaveProperty('accessToken');
+      const setCookie = response.headers['set-cookie'] as unknown as string[];
+      expect(setCookie).toHaveLength(1);
+      expect(setCookie[0]).toMatch(
+        /^access_token=eyJ[^;]+; Path=\/; HttpOnly; SameSite=Lax$/,
+      );
+    });
 
-      // Body must contain accessToken as a non-empty string
-      expect(response.body).toHaveProperty('accessToken')
-      expect(typeof response.body.accessToken).toBe('string')
-      expect(response.body.accessToken.length).toBeGreaterThan(0)
-    })
-
-    // ── Acceptance Criterion 2: Invalid password ───────────────────────────
-    it('should return 401 when the password is wrong', async () => {
+    it('returns 401 and does not set a cookie when the password is wrong', async () => {
       const response = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
           email: TEST_USER.email,
-          password: 'this-is-definitely-wrong'
+          password: 'this-is-definitely-wrong',
         })
+        .expect(401);
 
-      expect(response.status).toBe(401)
-    })
+      expect(response.headers['set-cookie']).toBeUndefined();
+    });
 
-    // ── Acceptance Criterion 3: Non-existent email ─────────────────────────
-    it('should return 401 when the email does not exist', async () => {
-      const response = await request(app.getHttpServer())
+    it('returns 401 when the email does not exist', async () => {
+      await request(app.getHttpServer())
         .post('/auth/login')
         .send({
           email: 'ghost@nowhere.com',
-          password: TEST_USER.password
+          password: TEST_USER.password,
         })
+        .expect(401);
+    });
 
-      // NestJS Passport returns 401 for unknown users, not 404.
-      // Returning 404 would reveal that an email is unregistered — a security leak.
-      expect(response.status).toBe(401)
-    })
-
-    // ── Acceptance Criterion 4a: Missing password ──────────────────────────
-    it('should return 400 when password is missing', async () => {
-      const response = await request(app.getHttpServer())
+    it.each([
+      { email: TEST_USER.email },
+      { email: 'not-an-email', password: TEST_USER.password },
+      {},
+    ])('returns 400 for invalid input %#', async (body) => {
+      await request(app.getHttpServer())
         .post('/auth/login')
-        .send({
-          email: TEST_USER.email
-          // password intentionally omitted
-        })
+        .send(body)
+        .expect(400);
+    });
+  });
 
-      expect(response.status).toBe(400)
-    })
+  describe('cookie-authenticated session', () => {
+    it('uses the login cookie for /auth/me and clears it on logout', async () => {
+      const agent = request.agent(app.getHttpServer());
 
-    // ── Acceptance Criterion 4b: Invalid email format ──────────────────────
-    it('should return 400 when email is not a valid email address', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: 'not-an-email',
-          password: TEST_USER.password
-        })
+      await agent.post('/auth/login').send({
+        email: TEST_USER.email,
+        password: TEST_USER.password,
+      }).expect(200);
 
-      expect(response.status).toBe(400)
-    })
+      const profileResponse = await agent.get('/auth/me').expect(200);
+      expect(profileResponse.body).toEqual({
+        id: expect.any(String),
+        email: TEST_USER.email,
+        displayName: TEST_USER.displayName,
+      });
 
-    // ── Acceptance Criterion 4c: Empty body ───────────────────────────────
-    it('should return 400 when the request body is empty', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({})
+      await agent.post('/auth/logout').expect(200);
+      await agent.get('/auth/me').expect(401);
+    });
 
-      expect(response.status).toBe(400)
-    })
-  })
+    it('returns 401 when no authentication cookie is provided', async () => {
+      await request(app.getHttpServer()).get('/auth/me').expect(401);
+    });
 
-  // ── GET /auth/me ───────────────────────────────────────────────────────────
+    it('returns 401 for an invalid authentication cookie', async () => {
+      await request(app.getHttpServer())
+        .get('/auth/me')
+        .set('Cookie', 'access_token=this.is.not.a.real.jwt')
+        .expect(401);
+    });
 
-  describe('GET /auth/me', () => {
-    /**
-     * We need a valid JWT for the protected-route tests.
-     * We get one by logging in first, then store it here to reuse.
-     */
-    let validToken: string
+    it('returns 401 for an expired authentication cookie', async () => {
+      const token = app.get(JwtService).sign(
+        {
+          sub: 'user-id',
+          email: TEST_USER.email,
+          displayName: TEST_USER.displayName,
+        },
+        { expiresIn: -1 },
+      );
 
-    beforeAll(async () => {
-      const loginResponse = await request(app.getHttpServer())
+      await request(app.getHttpServer())
+        .get('/auth/me')
+        .set('Cookie', `access_token=${token}`)
+        .expect(401);
+    });
+
+    it('does not accept a Bearer token without the cookie', async () => {
+      const jwt = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
           email: TEST_USER.email,
-          password: TEST_USER.password
-        })
+          password: TEST_USER.password,
+        });
+      const setCookie = jwt.headers['set-cookie'] as unknown as string[];
+      const token = setCookie[0].match(/^access_token=([^;]+)/)?.[1];
 
-      // Pull the token out of the login response
-      validToken = loginResponse.body.accessToken
-    })
-
-    // ── Acceptance Criterion 5: Protected route with valid token ───────────
-    it('should return 200 and user profile when a valid Bearer token is supplied', async () => {
-      const response = await request(app.getHttpServer())
+      expect(token).toBeDefined();
+      await request(app.getHttpServer())
         .get('/auth/me')
-        // The Authorization header is exactly what your JwtAuthGuard reads
-        .set('Authorization', `Bearer ${validToken}`)
-
-      expect(response.status).toBe(200)
-
-      // Check that the user shape matches the spec
-      expect(response.body).toHaveProperty('id')
-      expect(response.body).toHaveProperty('email', TEST_USER.email)
-      expect(response.body).toHaveProperty('displayName')
-    })
-
-    // ── Acceptance Criterion 6: Protected route without token ──────────────
-    it('should return 401 when no Authorization header is provided', async () => {
-      const response = await request(app.getHttpServer()).get('/auth/me')
-      // No .set('Authorization', ...) — deliberately omitted
-
-      expect(response.status).toBe(401)
-    })
-
-    // ── Bonus: Malformed / expired token ──────────────────────────────────
-    it('should return 401 when an invalid token is provided', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/auth/me')
-        .set('Authorization', 'Bearer this.is.not.a.real.jwt')
-
-      expect(response.status).toBe(401)
-    })
-  })
-})
+        .set('Authorization', `Bearer ${token}`)
+        .expect(401);
+    });
+  });
+});

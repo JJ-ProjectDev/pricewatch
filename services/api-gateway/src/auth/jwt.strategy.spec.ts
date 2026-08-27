@@ -1,4 +1,8 @@
-import { JwtStrategy } from './jwt.strategy';
+import { Request } from 'express';
+import {
+  extractAccessTokenFromCookie,
+  JwtStrategy,
+} from './jwt.strategy';
 
 describe('JwtStrategy', () => {
   const originalEnv = process.env;
@@ -28,6 +32,23 @@ describe('JwtStrategy', () => {
       email: 'user@example.com',
       displayName: 'Example',
     });
+  });
+
+  it('extracts the access token from the authentication cookie', () => {
+    const request = {
+      cookies: { access_token: 'signed-token' },
+    } as unknown as Request;
+
+    expect(extractAccessTokenFromCookie(request)).toBe('signed-token');
+  });
+
+  it('does not extract a token from an Authorization header', () => {
+    const request = {
+      cookies: {},
+      headers: { authorization: 'Bearer signed-token' },
+    } as unknown as Request;
+
+    expect(extractAccessTokenFromCookie(request)).toBeNull();
   });
 
   it('requires JWT_SECRET for strategy configuration', () => {

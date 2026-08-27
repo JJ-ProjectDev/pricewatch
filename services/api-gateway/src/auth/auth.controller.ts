@@ -6,11 +6,12 @@ import {
   HttpStatus,
   Post,
   Request,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth,
+  ApiCookieAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -18,7 +19,12 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { ApiErrorResponseDto } from '../common/dto/api-error-response.dto';
+import {
+  ACCESS_TOKEN_COOKIE_NAME,
+  getAuthCookieOptions,
+} from './auth-cookie.config';
 import { AuthService } from './auth.service';
 import { AuthenticatedUser, SafeUser } from './auth.types';
 import { LoginResponseDto } from './dto/login-response.dto';
@@ -39,7 +45,8 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @ApiOperation({
     summary: 'Log in',
-    description: 'Validates credentials and returns a signed JWT.',
+    description:
+      'Validates credentials and stores the signed JWT in an httpOnly cookie.',
   })
   @ApiOkResponse({
     description: 'Login successful.',
@@ -56,9 +63,24 @@ export class AuthController {
   login(
     @Request() request: { user: SafeUser },
     @Body() _dto: LoginUserDto,
+    @Res({ passthrough: true }) response: Response,
   ): LoginResponseDto {
-    // LocalAuthGuard validates credentials before the handler signs a token.
-    return this.authService.login(request.user);
+    const result = this.authService.login(request.user);
+    response.cookie(
+      ACCESS_TOKEN_COOKIE_NAME,
+      result.accessToken,
+      getAuthCookieOptions(),
+    );
+
+    return { user: result.user };
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Log out' })
+  @ApiOkResponse({ description: 'The authentication cookie was cleared.' })
+  logout(@Res({ passthrough: true }) response: Response): void {
+    response.clearCookie(ACCESS_TOKEN_COOKIE_NAME, getAuthCookieOptions());
   }
 
   @Post('register')
@@ -81,7 +103,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('access-token')
+  @ApiCookieAuth('access-token-cookie')
   @ApiOperation({ summary: 'Get the authenticated profile' })
   @ApiOkResponse({
     description: 'The authenticated user profile.',
