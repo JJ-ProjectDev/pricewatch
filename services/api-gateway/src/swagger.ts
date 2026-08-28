@@ -5,12 +5,13 @@ export function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
     .setTitle('PriceWatch API')
     .setDescription(
-      'API gateway for PriceWatch authentication, products, and health checks.',
+      'API gateway for PriceWatch authentication, products, watchlists, and health checks.',
     )
     .setVersion('0.1.0')
     .addTag('Health', 'Service availability checks')
     .addTag('Authentication', 'Registration, login, and authenticated profiles')
     .addTag('Products', 'Product catalogue queries')
+    .addTag('Watchlist', 'Authenticated product watchlist management')
     .addCookieAuth(
       'access_token',
       {
