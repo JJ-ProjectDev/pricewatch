@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
+import { ProductResponseDto } from '../products/dto/product-response.dto';
 import { WatchlistResponseDto } from './dto/watchlist-response.dto';
 
 @Injectable()
@@ -70,5 +71,17 @@ export class WatchlistService {
 
       throw error;
     }
+  }
+
+  async findAll(userId: string): Promise<ProductResponseDto[]> {
+    const watchlistEntries = await this.prisma.watchlist.findMany({
+      where: { userId },
+      include: { product: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return watchlistEntries.map(({ product }) =>
+      ProductResponseDto.fromProduct(product),
+    );
   }
 }

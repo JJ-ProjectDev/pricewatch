@@ -15,6 +15,7 @@ describe('WatchlistService', () => {
     watchlist: {
       create: jest.Mock;
       delete: jest.Mock;
+      findMany: jest.Mock;
     };
   };
   let service: WatchlistService;
@@ -27,6 +28,7 @@ describe('WatchlistService', () => {
       watchlist: {
         create: jest.fn(),
         delete: jest.fn(),
+        findMany: jest.fn(),
       },
     };
     service = new WatchlistService(prisma as never);
@@ -146,5 +148,52 @@ describe('WatchlistService', () => {
     await expect(
       service.remove('user-id', 'product-id'),
     ).rejects.toBe(databaseError);
+  });
+
+  it('returns products on the authenticated user\'s watchlist', async () => {
+    prisma.watchlist.findMany.mockResolvedValue([
+      {
+        id: 'watchlist-id',
+        userId: 'user-id',
+        productId: 'product-id',
+        createdAt,
+        product: {
+          id: 'product-id',
+          name: 'Test Product',
+          description: 'A product used to test the watchlist.',
+          imageUrl: 'https://example.com/product.jpg',
+          searchTerm: 'internal search term',
+          createdAt,
+          updatedAt: createdAt,
+          internalField: 'not-public',
+        },
+      },
+    ]);
+
+    const result = await service.findAll('user-id');
+
+    expect(prisma.watchlist.findMany).toHaveBeenCalledWith({
+      where: { userId: 'user-id' },
+      include: { product: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    expect(result).toEqual([
+      {
+        id: 'product-id',
+        name: 'Test Product',
+        description: 'A product used to test the watchlist.',
+        imageUrl: 'https://example.com/product.jpg',
+        createdAt,
+      },
+    ]);
+    expect(result[0]).not.toHaveProperty('searchTerm');
+    expect(result[0]).not.toHaveProperty('updatedAt');
+    expect(result[0]).not.toHaveProperty('internalField');
+  });
+
+  it('returns an empty array when the authenticated user has no watchlist entries', async () => {
+    prisma.watchlist.findMany.mockResolvedValue([]);
+
+    await expect(service.findAll('user-id')).resolves.toEqual([]);
   });
 });
