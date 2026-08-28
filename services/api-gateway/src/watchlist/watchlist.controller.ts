@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Param,
   Post,
   Request,
@@ -10,6 +11,7 @@ import {
   ApiCookieAuth,
   ApiCreatedResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
@@ -56,5 +58,33 @@ export class WatchlistController {
     @Param('productId') productId: string,
   ): Promise<WatchlistResponseDto> {
     return this.watchlistService.create(request.user.id, productId);
+  }
+
+  @Delete(':productId')
+  @UseGuards(JwtAuthGuard)
+  @ApiCookieAuth('access-token-cookie')
+  @ApiOperation({ summary: 'Remove a product from the authenticated watchlist' })
+  @ApiParam({
+    name: 'productId',
+    description: 'Product identifier',
+    example: 'cmrqetpqv0000pa4gf6oymc3t',
+  })
+  @ApiOkResponse({
+    description: 'The product was removed from the watchlist.',
+    type: WatchlistResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'The authentication cookie is missing, invalid, or expired.',
+    type: ApiErrorResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'The product is not on the authenticated watchlist.',
+    type: ApiErrorResponseDto,
+  })
+  remove(
+    @Request() request: { user: AuthenticatedUser },
+    @Param('productId') productId: string,
+  ): Promise<WatchlistResponseDto> {
+    return this.watchlistService.remove(request.user.id, productId);
   }
 }

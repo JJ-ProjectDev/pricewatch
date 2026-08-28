@@ -14,6 +14,7 @@ describe('WatchlistService', () => {
     };
     watchlist: {
       create: jest.Mock;
+      delete: jest.Mock;
     };
   };
   let service: WatchlistService;
@@ -25,6 +26,7 @@ describe('WatchlistService', () => {
       },
       watchlist: {
         create: jest.fn(),
+        delete: jest.fn(),
       },
     };
     service = new WatchlistService(prisma as never);
@@ -93,6 +95,56 @@ describe('WatchlistService', () => {
 
     await expect(
       service.create('user-id', 'product-id'),
+    ).rejects.toBe(databaseError);
+  });
+
+  it('removes a watchlist entry for the authenticated user', async () => {
+    prisma.watchlist.delete.mockResolvedValue({
+      id: 'watchlist-id',
+      userId: 'user-id',
+      productId: 'product-id',
+      createdAt,
+      internalField: 'not-public',
+    });
+
+    const result = await service.remove('user-id', 'product-id');
+
+    expect(prisma.watchlist.delete).toHaveBeenCalledWith({
+      where: {
+        userId_productId: {
+          userId: 'user-id',
+          productId: 'product-id',
+        },
+      },
+    });
+    expect(result).toEqual({
+      id: 'watchlist-id',
+      userId: 'user-id',
+      productId: 'product-id',
+      createdAt,
+    });
+    expect(result).not.toHaveProperty('internalField');
+  });
+
+  it('returns not found when the watchlist entry does not exist', async () => {
+    prisma.watchlist.delete.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('Record to delete not found', {
+        code: 'P2025',
+        clientVersion: Prisma.prismaVersion.client,
+      }),
+    );
+
+    await expect(
+      service.remove('user-id', 'product-id'),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('does not hide unexpected database errors when deleting', async () => {
+    const databaseError = new Error('Database unavailable');
+    prisma.watchlist.delete.mockRejectedValue(databaseError);
+
+    await expect(
+      service.remove('user-id', 'product-id'),
     ).rejects.toBe(databaseError);
   });
 });
