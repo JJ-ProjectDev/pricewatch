@@ -44,4 +44,31 @@ export class WatchlistService {
       throw error;
     }
   }
+
+  async remove(
+    userId: string,
+    productId: string,
+  ): Promise<WatchlistResponseDto> {
+    try {
+      const watchlistEntry = await this.prisma.watchlist.delete({
+        where: {
+          userId_productId: {
+            userId,
+            productId,
+          },
+        },
+      });
+
+      return WatchlistResponseDto.fromWatchlist(watchlistEntry);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('Watchlist entry not found');
+      }
+
+      throw error;
+    }
+  }
 }
