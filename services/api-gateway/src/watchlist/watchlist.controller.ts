@@ -1,6 +1,7 @@
 import {
   Controller,
   Delete,
+  Get,
   Param,
   Post,
   Request,
@@ -20,6 +21,7 @@ import {
 import { AuthenticatedUser } from '../auth/auth.types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiErrorResponseDto } from '../common/dto/api-error-response.dto';
+import { ProductResponseDto } from '../products/dto/product-response.dto';
 import { WatchlistResponseDto } from './dto/watchlist-response.dto';
 import { WatchlistService } from './watchlist.service';
 
@@ -27,6 +29,25 @@ import { WatchlistService } from './watchlist.service';
 @Controller('watchlist')
 export class WatchlistController {
   constructor(private readonly watchlistService: WatchlistService) {}
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiCookieAuth('access-token-cookie')
+  @ApiOperation({ summary: 'List products on the authenticated watchlist' })
+  @ApiOkResponse({
+    description: 'Products on the authenticated watchlist.',
+    type: ProductResponseDto,
+    isArray: true,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'The authentication cookie is missing, invalid, or expired.',
+    type: ApiErrorResponseDto,
+  })
+  findAll(
+    @Request() request: { user: AuthenticatedUser },
+  ): Promise<ProductResponseDto[]> {
+    return this.watchlistService.findAll(request.user.id);
+  }
 
   @Post(':productId')
   @UseGuards(JwtAuthGuard)
