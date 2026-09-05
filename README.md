@@ -1,16 +1,16 @@
 # PriceWatch
 
-PriceWatch is a portfolio-focused retail intelligence platform. Iteration 4
-adds a product catalogue and React frontend foundation: product entity,
-seed data, product endpoints, React Router, Tailwind CSS, shadcn/ui, Axios,
-and page structure. Business features such as watchlists, alerts, scraping,
-notifications, cloud deployment, and extra microservices are intentionally
-not implemented yet.
+PriceWatch is a portfolio-focused retail intelligence platform. Iteration 5
+adds user watchlists and auth UI: httpOnly cookie-based JWT authentication,
+login and register pages, protected routes, watchlist endpoints, a watchlist
+page, and watch/unwatch functionality on product pages. Business features
+such as scraping, notifications, cloud deployment, and extra microservices
+are intentionally not implemented yet.
 
 ## Services
 
 - `services/web`: React + TypeScript + Vite frontend
-- `services/api-gateway`: NestJS API gateway with `GET /health`, `POST /auth/register`, `POST /auth/login`, `GET /auth/me`, `GET /products`, and `GET /products/:id`
+- `services/api-gateway`: NestJS API gateway with `GET /health`, `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, `GET /products`, `GET /products/:id`, `GET /watchlist`, `POST /watchlist/:productId`, and `DELETE /watchlist/:productId`
 - `postgres`: PostgreSQL database
 - `redis`: Redis cache
 - `rabbitmq`: RabbitMQ broker with the management UI
@@ -112,26 +112,52 @@ Validation rules:
 
 ## Login Endpoint
 
-POST /auth/login validates credentials and returns a signed JWT.
+POST /auth/login validates credentials and sets an httpOnly cookie containing the JWT.
 Request body: { "email": "john@example.com", "password": "securepassword" }
-Success response 200 OK: { "access_token": "eyJ..." }
+Success response 200 OK: { "user": { "id": "clx...", "email": "...", "displayName": "..." } }
+Sets cookie: access_token (httpOnly, not accessible via JavaScript)
 Error responses: 400 Bad Request, 401 Unauthorized
+
+## Logout Endpoint
+
+POST /auth/logout clears the authentication cookie.
+No request body required.
+Success response 200 OK
 
 ## Profile Endpoint
 
 GET /auth/me returns the authenticated user's profile.
-Requires header: Authorization: Bearer <access_token>
+Requires a valid access_token cookie (set automatically by the browser after login).
 Success response 200 OK: { "id": "clx...", "email": "...", "displayName": "..." }
 Error response: 401 Unauthorized
+
 ## Products Endpoint
+
 GET /products returns all products in the catalogue.
 Success response 200 OK: [{ "id": "clx...", "name": "...", "description": "...", "imageUrl": "...", "createdAt": "..." }]
 Returns an empty array if no products exist.
 
 ## Product Detail Endpoint
+
 GET /products/:id returns a single product by id.
 Success response 200 OK: { "id": "clx...", "name": "...", "description": "...", "imageUrl": "...", "createdAt": "..." }
 Error response: 404 Not Found
+
+## Watchlist Endpoints
+
+All watchlist endpoints require a valid access_token cookie.
+
+GET /watchlist returns all products on the authenticated user's watchlist.
+Success response 200 OK: [{ "id": "clx...", "name": "...", "description": "...", "imageUrl": "...", "createdAt": "..." }]
+Returns an empty array if the user has no watched products.
+
+POST /watchlist/:productId adds a product to the authenticated user's watchlist.
+Success response 201 Created: { "id": "clx...", "userId": "...", "productId": "...", "createdAt": "..." }
+Error responses: 404 Not Found (product does not exist), 409 Conflict (already watching)
+
+DELETE /watchlist/:productId removes a product from the authenticated user's watchlist.
+Success response 200 OK
+Error response: 404 Not Found (not on watchlist)
 
 ## Iteration 2 Scope
 
@@ -139,6 +165,7 @@ Implemented: Prisma ORM, User entity, Registration DTO, Password hashing,
 POST /auth/register, Registration tests, Documentation
 
 ## Iteration 3 Scope
+
 Implemented: POST /auth/login, GET /auth/me, Login DTO, Passport local
 strategy, Passport JWT strategy, JWT signing with @nestjs/jwt, protected
 route guard, Authentication tests, Documentation
@@ -148,3 +175,10 @@ Implemented: Product entity, Prisma migration, seed data, GET /products,
 GET /products/:id, product endpoint tests, React Router v6, Tailwind CSS,
 shadcn/ui, Axios API client, page structure and routing, layout and navbar,
 product listing page, product detail page, Documentation
+
+## Iteration 5 Scope
+Implemented: httpOnly cookie-based JWT auth, POST /auth/logout, Watchlist
+entity and migration, GET /watchlist, POST /watchlist/:productId,
+DELETE /watchlist/:productId, watchlist endpoint tests, AuthContext,
+login page, register page, protected routes, WatchlistContext,
+Watch/Unwatch button, watchlist page, navbar auth states, Documentation
