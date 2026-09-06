@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, NavLink } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useState } from 'react'
 import { buttonVariants, Button } from '../ui/button'
@@ -59,8 +59,30 @@ export default function Navbar() {
                 exit="exit"
                 transition={navTransition}
               >
-                <Link to="/products">Products</Link>
-                <Link to="/watchlist">Watchlist</Link>
+                <NavLink
+                  to="/products"
+                  className={({ isActive }) =>
+                    `transition-[text-shadow,color] hover:[text-shadow:0_0_4px_color-mix(in_oklch,var(--color-foreground)_40%,transparent)]${
+                      isActive
+                        ? 'text-foreground [text-shadow:0_0_4px_color-mix(in_oklch,var(--color-foreground)_40%,transparent)]'
+                        : 'text-muted-foreground'
+                    }`
+                  }
+                >
+                  Products
+                </NavLink>
+                <NavLink
+                  to="/watchlist"
+                  className={({ isActive }) =>
+                    `transition-[text-shadow,color] hover:[text-shadow:0_0_4px_color-mix(in_oklch,var(--color-foreground)_40%,transparent)] ${
+                      isActive
+                        ? 'text-foreground [text-shadow:0_0_4px_color-mix(in_oklch,var(--color-foreground)_40%,transparent)]'
+                        : 'text-muted-foreground'
+                    }`
+                  }
+                >
+                  Watchlist
+                </NavLink>
               </motion.div>
             )}
           </AnimatePresence>
