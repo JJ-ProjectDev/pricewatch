@@ -1,12 +1,31 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { buttonVariants, Button } from '../ui/button'
+import { TrendingDown, LogOut } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import type { Transition } from 'framer-motion'
+
+const guestVariants = {
+  initial: { y: 12, opacity: 0 },
+  animate: { y: 0, opacity: 1 },
+  exit: { y: 12, opacity: 0 }
+}
+
+const authVariants = {
+  initial: { y: -12, opacity: 0 },
+  animate: { y: 0, opacity: 1 },
+  exit: { y: -12, opacity: 0 }
+}
+
+const navTransition: Transition = { duration: 0.5, ease: 'easeInOut' }
 
 export default function Navbar() {
   const [error, setError] = useState<null | string>(null)
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const navigate = useNavigate()
+  const [debugAuthed, setDebugAuthed] = useState(false)
+
   async function handleLogout() {
     try {
       await logout()
@@ -17,21 +36,95 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="flex justify-around h-10 items-center ">
-      <Link to="/">PriceWatch</Link>
-      <Link to="/products">Products</Link>
-      {isLoading ? null : isAuthenticated ? (
-        <>
-          <p>Welcome {user?.displayName}</p>
-          <Link to={'/watchlist'}>Watchlist</Link>
-          <button onClick={handleLogout}>Log out</button>
-        </>
-      ) : (
-        <>
-          <Link to={'/login'}>Log in</Link>
-          <Link to={'/register'}>Register</Link>
-        </>
-      )}
-    </nav>
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-background/85 backdrop-blur-md">
+      <nav className="mx-auto max-w-6xl px-4 grid grid-cols-3 items-center h-16">
+        <Link className="flex gap-2 justify-self-start items-center" to="/">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary">
+            <TrendingDown className="size-5 text-black" />
+          </span>
+          <span className="hidden sm:inline font-mono font-medium text-primary-foreground">
+            PriceWatch
+          </span>
+        </Link>
+
+        <div className="relative justify-self-center w-full h-full flex items-center">
+          <AnimatePresence>
+            {!isLoading && debugAuthed && (
+              <motion.div
+                key="center-links"
+                className="absolute left-1/2 -translate-x-1/2 flex gap-4 font-medium text-sm text-foreground"
+                variants={authVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={navTransition}
+              >
+                <Link to="/products">Products</Link>
+                <Link to="/watchlist">Watchlist</Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="relative justify-self-end w-full h-full flex items-center">
+          <AnimatePresence>
+            {isLoading ? null : debugAuthed ? (
+              <motion.div
+                key="right-user"
+                className="absolute right-0 flex gap-4 items-center"
+                variants={authVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={navTransition}
+              >
+                <p className="hidden text-muted-foreground text-sm sm:inline">
+                  Welcome {user?.displayName}
+                </p>
+                <Button
+                  variant="ghost"
+                  onClick={handleLogout}
+                  className="rounded-full p-2 border-2 border-accent sm:rounded-md sm:px-3 sm:py-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline">Log out</span>
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="guest-links"
+                className="absolute right-0 flex items-center gap-2"
+                variants={guestVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={navTransition}
+              >
+                <Link
+                  to="/register"
+                  className={buttonVariants({ variant: 'ghost' })}
+                >
+                  Register
+                </Link>
+                <Link
+                  to="/login"
+                  className={buttonVariants({ variant: 'default' })}
+                >
+                  Sign In
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </nav>
+
+      {/* temporary — remove before committing */}
+      <button
+        onClick={() => setDebugAuthed((v) => !v)}
+        className="absolute -bottom-8 left-4 text-xs"
+      >
+        toggle auth (debug)
+      </button>
+    </header>
   )
 }
