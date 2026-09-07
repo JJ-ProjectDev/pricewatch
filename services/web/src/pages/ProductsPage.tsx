@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react'
 import api from '@/lib/api'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardTitle,
-  CardHeader
-} from '@/components/ui/card'
-import { WatchButton } from '@/components/watchlist/WatchButton'
-import { Link } from 'react-router-dom'
 import { Product } from '@/lib/types'
 import ProductCard from '@/components/ui/ProductCard'
+import { motion } from 'framer-motion'
+import { ScrambleText } from '@/components/ScrambleText'
+import { ProductCardSkeleton } from '@/components/ui/ProductCardSkeleton'
+
+const container = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.15 } }
+}
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -25,47 +24,38 @@ export default function ProductsPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  // TODO: revert once CORS is fixed
-  const MOCK_PRODUCTS: Product[] = [
-    {
-      id: '1',
-      name: 'Vertex RTX 4070 Ti',
-      description:
-        'A compact two-slot card that fits small-form-factor builds without compromising on 1080p and 1440p performance.',
-      imageUrl: 'https://picsum.photos/seed/gpu1/600/400',
-      createdAt: '2025-01-15T10:00:00.000Z'
-    },
-    {
-      id: '2',
-      name: 'Nimbus Air 14',
-      description:
-        'A thin-and-light 14 inch laptop built for all-day battery life without sacrificing performance on the go.',
-      imageUrl: 'https://picsum.photos/seed/laptop2/600/400',
-      createdAt: '2025-02-20T10:00:00.000Z'
-    },
-    {
-      id: '3',
-      name: 'Solace X2',
-      description:
-        'A flagship phone with a large OLED display, all-day battery, and a versatile triple-camera system.',
-      imageUrl: 'https://picsum.photos/seed/phone3/600/400',
-      createdAt: '2025-03-05T10:00:00.000Z'
-    }
-  ]
-
-  //if (loading) return <p>Loading...</p>
-  //if (error) return <p>Something went wrong, please try again</p>
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <ProductCardSkeleton key={i} />
+        ))}
+      </div>
+    )
+  }
+  if (error) return <p>Something went wrong, please try again</p>
   return (
-    <div>
-      {MOCK_PRODUCTS.length === 0 ? (
-        <p> no products found </p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {MOCK_PRODUCTS.map((product) => (
-            <ProductCard product={product} />
-          ))}
-        </div>
-      )}
+    <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-3">
+        <h1 className="font-mono">
+          <ScrambleText text="Products" />
+        </h1>
+        <p className="text-muted-foreground">
+          Every product currently tracked on Pricewatch, across GPUs, laptops,
+          and phones.
+        </p>
+      </div>
+      <motion.div initial="hidden" animate="visible" variants={container}>
+        {products.length === 0 ? (
+          <p> no products found </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <ProductCard product={product} key={product.id} />
+            ))}
+          </div>
+        )}
+      </motion.div>
     </div>
   )
 }
