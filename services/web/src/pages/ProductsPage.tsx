@@ -56,16 +56,16 @@ export default function ProductsPage() {
   //if (loading) return <p>Loading...</p>
   //if (error) return <p>Something went wrong, please try again</p>
   return (
-    <main>
+    <div>
       {MOCK_PRODUCTS.length === 0 ? (
         <p> no products found </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {MOCK_PRODUCTS.map((product) => (
             <ProductCard product={product} />
           ))}
         </div>
       )}
-    </main>
+    </div>
   )
 }
