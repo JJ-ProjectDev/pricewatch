@@ -1,6 +1,8 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { useWatchlist } from '@/contexts/WatchlistContext'
 import { useState } from 'react'
+import { Bookmark, BookmarkOff } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export function WatchButton({ productId }: { productId: string }) {
   const { isAuthenticated } = useAuth()
@@ -20,15 +22,31 @@ export function WatchButton({ productId }: { productId: string }) {
     }
   }
 
-  if (!isAuthenticated) return null
-  if (isWatchlistLoading || isToggling) {
-    return <button disabled>Loading</button>
-  }
+  // if (!isAuthenticated) return null
+  // if (isWatchlistLoading || isToggling) {
+  //   return <button disabled>Loading</button>
+  // }
+  const isWatched = watchlistIds.has(productId)
+  const label = isWatched? 'Unwatch' : 'Watch'
 
-  const label = watchlistIds.has(productId) ? 'Unwatch' : 'Watch'
   return (
     <div>
-      <button onClick={toggle}>{label}</button>
+      <button
+        className={cn(
+          'flex items-center gap-1 px-2.5 py-1 rounded-md hover:cursor-pointer',
+          isWatched ? 'bg-accent' : 'bg-primary'
+        )}
+        onClick={toggle}
+      >
+        <span>
+          {isWatched ? (
+            <BookmarkOff size={16} />
+          ) : (
+            <Bookmark size={16} />
+          )}
+        </span>
+        {label}
+      </button>
       {error && <p>{error}</p>}
     </div>
   )
