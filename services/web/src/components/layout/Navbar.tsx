@@ -24,7 +24,6 @@ export default function Navbar() {
   const [error, setError] = useState<null | string>(null)
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const navigate = useNavigate()
-  const [debugAuthed, setDebugAuthed] = useState(false)
 
   async function handleLogout() {
     try {
@@ -49,7 +48,7 @@ export default function Navbar() {
 
         <div className="relative justify-self-center w-full h-full flex items-center">
           <AnimatePresence>
-            {!isLoading && debugAuthed && (
+            {!isLoading && isAuthenticated && (
               <motion.div
                 key="center-links"
                 className="absolute left-1/2 -translate-x-1/2 flex gap-4 font-medium text-sm text-foreground"
@@ -90,7 +89,7 @@ export default function Navbar() {
 
         <div className="relative justify-self-end w-full h-full flex items-center">
           <AnimatePresence>
-            {isLoading ? null : debugAuthed ? (
+            {isLoading ? null : isAuthenticated ? (
               <motion.div
                 key="right-user"
                 className="absolute right-0 flex gap-4 items-center"
@@ -139,14 +138,6 @@ export default function Navbar() {
           </AnimatePresence>
         </div>
       </nav>
-
-      {/* temporary — remove before committing */}
-      <button
-        onClick={() => setDebugAuthed((v) => !v)}
-        className="absolute -bottom-8 left-4 text-xs"
-      >
-        toggle auth (debug)
-      </button>
     </header>
   )
 }
