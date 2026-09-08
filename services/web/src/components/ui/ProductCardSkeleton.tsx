@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 
-function SkeletonBlock({ className }: { className?: string }) {
+export function SkeletonBlock({ className }: { className?: string }) {
   return (
     <div className={cn('relative overflow-hidden rounded bg-accent', className)}>
       <motion.div
