@@ -72,6 +72,7 @@ export default function ProductsPage() {
             size={18}
           />
           <input
+            aria-label="Search products"
             placeholder="Search products..."
             className="pl-9 w-full outline-none  "
           />
