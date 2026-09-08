@@ -11,6 +11,8 @@ import {
 import { Search, SearchX } from 'lucide-react'
 import type { Transition } from 'framer-motion'
 
+import { MOCK_PRODUCTS } from '@/lib/data/mockData'
+
 const container = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.15 } }
@@ -25,12 +27,17 @@ export default function ProductsPage() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  // useEffect(() => {
+  //   api
+  //     .get<Product[]>('/products')
+  //     .then((response) => setProducts(response.data))
+  //     .catch((err) => setError(err))
+  //     .finally(() => setLoading(false))
+  // }, [])
+
   useEffect(() => {
-    api
-      .get<Product[]>('/products')
-      .then((response) => setProducts(response.data))
-      .catch((err) => setError(err))
-      .finally(() => setLoading(false))
+    setProducts(MOCK_PRODUCTS)
+    setLoading(false)
   }, [])
 
   if (loading) {
@@ -66,14 +73,14 @@ export default function ProductsPage() {
             and phones.
           </p>
         </div>
-        <div className="relative border-2 w-100 border-border py-3 rounded-md shadow-[0px_0px_10px_0px_#2e2e2e] focus-within:border-primary hover:shadow-[0px_0px_10px_0px_var(--primary)] focus-within:shadow-[0px_0px_10px_0px_var(--primary)]">
+        <div className="relative border-2 w-100 border-border py-3 bg-card rounded-md shadow-[0px_0px_10px_0px_#2e2e2e] focus-within:border-primary hover:shadow-[0px_0px_10px_0px_var(--primary)] focus-within:shadow-[0px_0px_10px_0px_var(--primary)]">
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             size={18}
           />
           <input
             placeholder="Search products..."
-            className="pl-9 w-full outline-none  "
+            className="pl-9 w-full outline-none"
           />
         </div>
       </div>
@@ -99,3 +106,5 @@ export default function ProductsPage() {
     </motion.div>
   )
 }
+
+// TODO(revert): remove MOCK_PRODUCTS usage and restore the real api.get(...) fetch once the backend is wired
