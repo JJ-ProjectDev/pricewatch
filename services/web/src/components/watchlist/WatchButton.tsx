@@ -33,7 +33,7 @@ export function WatchButton({ productId }: { productId: string }) {
     <div>
       <button
         className={cn(
-          'flex items-center gap-1 px-2.5 py-1 rounded-md hover:cursor-pointer',
+          'flex items-center gap-1 px-2.5 py-1 rounded-md hover:cursor-pointer hover:shadow-[0px_0px_10px_0px_#10b981]',
           isWatched ? 'bg-accent' : 'bg-primary'
         )}
         onClick={toggle}

@@ -84,8 +84,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <CardFooter className="mb-4 flex justify-between items-center">
             <div className="flex flex-col gap-2 font-mono">
               <p className="text-xl">£{getMockPrice(product.id)}</p>
-              <span className="bg-primary/30 text-primary px-2 rounded-2xl">
-                {' '}
+              <span className="bg-primary/30 text-primary px-2 rounded-2xl font-sans">
                 -10%
               </span>
             </div>

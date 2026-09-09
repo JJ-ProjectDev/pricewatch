@@ -67,7 +67,7 @@ export default function BackgroundWave() {
             height: '4px',
             transform: `translate(-50%, -50%) rotate(${segment.angle}deg)`,
             boxShadow: NEON_GLOW,
-            opacity: 0.6,
+            opacity: 0.1,
           }}
         />
       ))}
