@@ -56,7 +56,7 @@ export default function ProductCard({ product }: { product: Product }) {
           transition={{ duration: 0.2 }}
         >
           <div className="overflow-hidden relative">
-            {imgFailed ? (
+            {imgFailed || product.imageUrl.length === 0 ? (
               <div className="w-full aspect-4/3 flex items-center justify-center bg-accent rounded-lg ">
                 <Icon className="w-10 h-10 text-muted-foreground" />
               </div>
