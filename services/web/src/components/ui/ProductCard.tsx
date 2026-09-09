@@ -9,31 +9,10 @@ import { useNavigate } from 'react-router-dom'
 import { Cpu, Smartphone, Laptop } from 'lucide-react'
 
 // simple substring match; good enough for known mock data, revisit if real product names get added
-export function deriveCategory(
-  name: string
-): 'Graphics Card' | 'Phone' | 'Laptop' {
-  const t = name.toLocaleLowerCase()
-
-  if (['gpu', 'rtx', 'rx'].some((kw) => t.includes(kw))) {
-    return 'Graphics Card'
-  }
-  if (['book', 'pro', 'air', 'slim'].some((kw) => t.includes(kw))) {
-    return 'Laptop'
-  }
-  return 'Phone'
-}
+import deriveCategory from '@/lib/utils/getCategory'
 
 // mock price until backend returns a real price field
-const PRICES = [49, 99, 149, 249, 399, 599, 899, 1299, 1999]
-export function getMockPrice(productId: string): number {
-  let hash = 0
-
-  for (let i = 0; i < productId.length; i++) {
-    hash = hash * 31 + productId.charCodeAt(i)
-  }
-  const index = Math.abs(hash) % PRICES.length
-  return PRICES[index]
-}
+import { getMockPrice } from '@/lib/utils/getPrices'
 
 const itemVariants = {
   hidden: { opacity: 0, y: 12 },
@@ -77,7 +56,7 @@ export default function ProductCard({ product }: { product: Product }) {
           transition={{ duration: 0.2 }}
         >
           <div className="overflow-hidden relative">
-            {imgFailed ? (
+            {imgFailed || product.imageUrl.length === 0 ? (
               <div className="w-full aspect-4/3 flex items-center justify-center bg-accent rounded-lg ">
                 <Icon className="w-10 h-10 text-muted-foreground" />
               </div>
@@ -105,8 +84,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <CardFooter className="mb-4 flex justify-between items-center">
             <div className="flex flex-col gap-2 font-mono">
               <p className="text-xl">£{getMockPrice(product.id)}</p>
-              <span className="bg-primary/30 text-primary px-2 rounded-2xl">
-                {' '}
+              <span className="bg-primary/30 text-primary px-2 rounded-2xl font-sans">
                 -10%
               </span>
             </div>
