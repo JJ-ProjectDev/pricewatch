@@ -23,30 +23,20 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null)
 
   const { id } = useParams()
-  // useEffect(() => {
-  //   api
-  //     .get(`/products/${id}`)
-  //     .then((response) => {
-  //       setProduct(response.data)
-  //       setStatus('loaded')
-  //     })
-  //     .catch((err) => {
-  //       if (err.response?.status === 404) {
-  //         setStatus('notFound')
-  //       } else {
-  //         setStatus('error')
-  //       }
-  //     })
-  // }, [id])
-
   useEffect(() => {
-    const found = MOCK_PRODUCTS.find((p) => p.id === id)
-    if (found) {
-      setProduct(found)
-      setStatus('loaded')
-    } else {
-      setStatus('notFound')
-    }
+    api
+      .get(`/products/${id}`)
+      .then((response) => {
+        setProduct(response.data)
+        setStatus('loaded')
+      })
+      .catch((err) => {
+        if (err.response?.status === 404) {
+          setStatus('notFound')
+        } else {
+          setStatus('error')
+        }
+      })
   }, [id])
 
   if (status === 'loading') return <ProductDetailSkeleton />
@@ -153,5 +143,3 @@ export default function ProductDetailPage() {
     </>
   )
 }
-
-// TODO(revert): remove MOCK_PRODUCTS usage and restore the real api.get(...) fetch once the backend is wired

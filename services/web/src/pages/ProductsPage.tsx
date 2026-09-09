@@ -27,17 +27,12 @@ export default function ProductsPage() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // useEffect(() => {
-  //   api
-  //     .get<Product[]>('/products')
-  //     .then((response) => setProducts(response.data))
-  //     .catch((err) => setError(err))
-  //     .finally(() => setLoading(false))
-  // }, [])
-
   useEffect(() => {
-    setProducts(MOCK_PRODUCTS)
-    setLoading(false)
+    api
+      .get<Product[]>('/products')
+      .then((response) => setProducts(response.data))
+      .catch((err) => setError(err))
+      .finally(() => setLoading(false))
   }, [])
 
   if (loading) {
@@ -117,5 +112,3 @@ export default function ProductsPage() {
     </motion.div>
   )
 }
-
-// TODO(revert): remove MOCK_PRODUCTS usage and restore the real api.get(...) fetch once the backend is wired
