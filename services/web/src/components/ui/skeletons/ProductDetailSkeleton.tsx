@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { SkeletonBlock } from './ProductCardSkeleton'
-import { buttonVariants } from './button'
+import { buttonVariants } from '../button'
 
 export function ProductDetailSkeleton() {
   return (

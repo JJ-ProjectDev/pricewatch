@@ -6,7 +6,7 @@ import { Product } from '@/lib/types'
 import { Link } from 'react-router-dom'
 import { buttonVariants } from '@/components/ui/button'
 import { ArrowLeft, PackageX, TriangleAlert } from 'lucide-react'
-import { ProductDetailSkeleton } from '@/components/ui/ProductDetailSkeleton'
+import { ProductDetailSkeleton } from '@/components/ui/skeletons/ProductDetailSkeleton'
 import { motion } from 'framer-motion'
 type Status = 'loading' | 'notFound' | 'error' | 'loaded'
 
@@ -17,6 +17,7 @@ import deriveCategory from '@/lib/utils/getCategory'
 import { getMockPrice } from '@/lib/utils/getPrices'
 
 import { MOCK_PRODUCTS } from '@/lib/data/mockData'
+import SomethingWentWrong from '@/components/ui/SomethingWentWrong'
 
 export default function ProductDetailPage() {
   const [status, setStatus] = useState<Status>('loading')
@@ -58,20 +59,7 @@ export default function ProductDetailPage() {
         </Link>
       </div>
     )
-  if (status === 'error')
-    return (
-      <div className="flex flex-col items-center mt-30">
-        <TriangleAlert className="text-zinc-700" size={100} strokeWidth="2.3" />
-        <p className="text-foreground font-semibold text-2xl pb-2 mb-3 border-b ">
-          Something went wrong
-        </p>
-        <p className="text-muted-foreground text-sm mb-5">Try again latter</p>
-        <Link to="/products" className={buttonVariants({ variant: 'outline' })}>
-          <ArrowLeft size={18} />
-          Back to products
-        </Link>
-      </div>
-    )
+  if (status === 'error') return <SomethingWentWrong />
   return (
     <>
       {product && (
