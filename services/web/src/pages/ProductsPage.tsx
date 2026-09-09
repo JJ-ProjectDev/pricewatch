@@ -7,11 +7,13 @@ import { ScrambleText } from '@/components/ScrambleText'
 import {
   ProductCardSkeleton,
   SkeletonBlock
-} from '@/components/ui/ProductCardSkeleton'
-import { Search, SearchX, TriangleAlert } from 'lucide-react'
+} from '@/components/ui/skeletons/ProductCardSkeleton'
+import { ArrowLeft, Link, Search, SearchX, TriangleAlert } from 'lucide-react'
 import type { Transition } from 'framer-motion'
 
 import { MOCK_PRODUCTS } from '@/lib/data/mockData'
+import { buttonVariants } from '@/components/ui/button'
+import SomethingWentWrong from '@/components/ui/SomethingWentWrong'
 
 const container = {
   hidden: {},
@@ -50,16 +52,7 @@ export default function ProductsPage() {
       </div>
     )
   }
-  if (error)
-    return (
-      <div className="flex flex-col items-center mt-30">
-        <TriangleAlert className="text-zinc-700" size={100} strokeWidth="2.3" />
-        <p className="text-foreground font-semibold text-2xl pb-2 mb-3 border-b ">
-          Something went wrong
-        </p>
-        <p className="text-muted-foreground text-sm mb-5">Try again latter</p>
-      </div>
-    )
+  if (error) return <SomethingWentWrong />
   return (
     <motion.div
       className="flex flex-col gap-10"
