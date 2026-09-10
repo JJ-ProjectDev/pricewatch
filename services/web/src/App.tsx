@@ -19,9 +19,8 @@ export default function App() {
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/watchlist" element={<WatchlistPage />} />
-        //TODO return watchlist to be nested as a protected route
         <Route element={<ProtectedRoute />}>
+          <Route path="/watchlist" element={<WatchlistPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
