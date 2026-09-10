@@ -10,7 +10,12 @@ const fakeProd = MOCK_PRODUCTS[0]
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col justify-center items-center align-middle w-full mt-10 gap-40">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="flex flex-col justify-center items-center align-middle w-full mt-10 gap-40"
+    >
       <div className="flex gap-30 items-center">
         <motion.div
           className="max-w-lg flex flex-col gap-5"
@@ -86,7 +91,12 @@ export default function HomePage() {
         </motion.div>
       </div>
       {/* retailers */}
-      <div className="flex flex-col items-center gap-3">
+      <motion.div
+        className="flex flex-col items-center gap-3"
+        initial={{ opacity: 0, y: 100 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: 'easeOut' }}
+      >
         <h3 className="text-muted-foreground">
           Prices tracked from retailers like:
         </h3>
@@ -95,24 +105,96 @@ export default function HomePage() {
           <FaAmazon size={40} />
           <FaEbay size={40} />
         </div>
-      </div>
+      </motion.div>
       {/* steps */}
-      <div className="flex flex-col justify-center items-center gap-20">
+      <motion.div
+        initial={{ opacity: 0, y: 100 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: 'easeOut' }}
+        className="flex flex-col justify-center items-center gap-20"
+      >
         <h3 className="text-4xl font-medium">How it works</h3>
-        <div className="relative flex ">
-          <p className="absolute -top-25 left-28 text-[200px] font-bold text-muted-foreground/10 -z-10">
-            1
-          </p>
-          <div className="flex flex-col max-w-xs items-center">
-            <Search />
-            <p>Add what you're watching</p>
-            <p className="text-xs">
-              Search for the exact GPU, laptop or phone you're waiting to buy,
-              from retailers you already shop.
+        <div className="flex gap-5">
+          {/* little card */}
+          <div className="relative">
+            <p className="absolute -top-30 left-20 text-[230px] font-bold text-muted-foreground/10 -z-10">
+              1
             </p>
+            <div className="flex flex-col max-w-xs ">
+              <div className="flex flex-col items-center gap-3">
+                <Search size={35} className="text-primary" />
+                <div>
+                  <p className="text-end font-medium">
+                    Add what you're watching
+                  </p>
+                  <p className="text-xs text-end max-w-3xs text-muted-foreground">
+                    Search for the exact GPU, laptop or phone you're waiting to
+                    buy, from retailers you already shop.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span className="bg-muted-foreground w-px"></span>
+          <div className="relative">
+            <p className="absolute -top-30 left-15 text-[230px] font-bold text-muted-foreground/10 -z-10">
+              2
+            </p>
+            <div className="flex flex-col max-w-xs ">
+              <div className="flex flex-col items-center gap-3">
+                <ChartLine size={35} className="text-primary" />
+                <div>
+                  <p className="text-center font-medium">We track the price</p>
+                  <p className="text-xs text-center max-w-3xs text-muted-foreground">
+                    Pricewatch checks in regularly and builds a history, so you
+                    can see exactly how the price has moved.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span className="bg-muted-foreground w-px"></span>
+          <div className="relative">
+            <p className="absolute -top-30 left-15 text-[230px] font-bold text-muted-foreground/10 -z-10">
+              3
+            </p>
+            <div className="flex flex-col max-w-xs ">
+              <div className="flex flex-col items-center gap-3">
+                <BellRing size={35} className="text-primary" />
+                <div>
+                  <p className="text-start font-medium">
+                    Get notified at the right moment
+                  </p>
+                  <p className="text-xs text-start max-w-3xs text-muted-foreground">
+                    The moment a price drops to a level worth acting on, you’ll
+                    know — no more checking manually.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+      {/* last card */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, ease: 'easeOut' }}
+      >
+        <div className="bg-card border-2 border-border rounded-3xl flex flex-col justify-center items-center px-40 py-20 gap-5">
+          <h4 className="text-xl">Stop refreshing product pages</h4>
+          <p className="text-muted-foreground">
+            Create a free account and start tracking your first product in under
+            a minute.
+          </p>
+          <Link
+            to="/register"
+            className="bg-primary px-3 py-2 rounded-lg hover:bg-primary/70"
+          >
+            Create free account
+          </Link>
+        </div>
+      </motion.div>
+    </motion.div>
   )
 }
