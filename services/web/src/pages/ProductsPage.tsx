@@ -36,6 +36,7 @@ export default function ProductsPage() {
       .catch((err) => setError(err))
       .finally(() => setLoading(false))
   }, [])
+  
 
   if (loading) {
     return (

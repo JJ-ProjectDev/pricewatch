@@ -11,6 +11,7 @@ export function WatchButton({ productId }: { productId: string }) {
   const [error, setError] = useState<string | null>(null)
   async function toggle(e: React.MouseEvent<HTMLButtonElement>) {
     e.stopPropagation()
+    e.preventDefault()
     setIsToggling(true)
     setError(null)
     try {
@@ -27,7 +28,7 @@ export function WatchButton({ productId }: { productId: string }) {
   //   return <button disabled>Loading</button>
   // }
   const isWatched = watchlistIds.has(productId)
-  const label = isWatched? 'Unwatch' : 'Watch'
+  const label = isWatched ? 'Unwatch' : 'Watch'
 
   return (
     <div>
@@ -39,11 +40,7 @@ export function WatchButton({ productId }: { productId: string }) {
         onClick={toggle}
       >
         <span>
-          {isWatched ? (
-            <BookmarkOff size={16} />
-          ) : (
-            <Bookmark size={16} />
-          )}
+          {isWatched ? <BookmarkOff size={16} /> : <Bookmark size={16} />}
         </span>
         {label}
       </button>
