@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/skeletons/ProductCardSkeleton'
 import { ArrowLeft, Link, Search, SearchX, TriangleAlert } from 'lucide-react'
 import type { Transition } from 'framer-motion'
+import { useTypewriterPlaceholder } from '@/lib/utils/useTypewriterPlaceholder'
 
 import { MOCK_PRODUCTS } from '@/lib/data/mockData'
 import { buttonVariants } from '@/components/ui/button'
@@ -36,7 +37,14 @@ export default function ProductsPage() {
       .catch((err) => setError(err))
       .finally(() => setLoading(false))
   }, [])
-  
+  const placeholder = useTypewriterPlaceholder([
+    'RTX 4090',
+    'MacBook Pro 16',
+    'iPhone 15 Pro',
+    'Samsung Galaxy S24',
+    'PS5 Console',
+    'Dell XPS 15'
+  ])
 
   if (loading) {
     return (
@@ -77,7 +85,7 @@ export default function ProductsPage() {
             size={18}
           />
           <input
-            placeholder="Search products..."
+            placeholder={placeholder}
             className="pl-9 w-full outline-none"
           />
         </div>
