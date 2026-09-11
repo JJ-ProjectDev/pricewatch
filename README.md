@@ -143,6 +143,44 @@ GET /products/:id returns a single product by id.
 Success response 200 OK: { "id": "clx...", "name": "...", "description": "...", "imageUrl": "...", "createdAt": "..." }
 Error response: 404 Not Found
 
+## Listing Storage
+
+Issue #102 adds a `Listing` model in
+`services/api-gateway/prisma/schema.prisma`, stored in the `listings` table.
+Each listing records a generated cuid `id`, its `productId`, decimal `price`,
+`retailer`, listing `url`, and the scraper-supplied `fetchedAt` timestamp.
+Prices use Prisma's PostgreSQL `DECIMAL(65,30)` mapping. Callers can provide
+decimal strings or `Prisma.Decimal` values to avoid floating-point arithmetic.
+
+A product can have zero or many listings, including repeated observations
+from the same retailer. `productId` is indexed and references an existing
+product; deleting that product cascades to its listings. `Product.searchTerm`
+is the search query the scraper will use to find retailer listings; the
+existing seed data already supplies it.
+
+Apply committed migrations and regenerate Prisma Client with:
+
+```bash
+docker compose up -d postgres
+docker compose run --rm --no-deps api-gateway pnpm run prisma:migrate:deploy
+docker compose run --rm --no-deps api-gateway pnpm run prisma:generate
+```
+
+The API's normal development startup also applies migrations and generates
+the client. This migration adds listing storage without seeding any listings.
+Queue ingestion and API responses containing listings are follow-up work in
+issues #103 and #105.
+
+Run the focused database tests against a migrated development/test database:
+
+```bash
+docker compose run --rm --no-deps api-gateway pnpm exec jest --runInBand --runTestsByPath src/database/listing.integration-spec.ts
+```
+
+These tests create and clean up their own temporary products and listings;
+they do not require seeded data. They cover decimal and timestamp storage,
+empty and multiple listings, foreign-key enforcement, and cascade deletion.
+
 ## Watchlist Endpoints
 
 All watchlist endpoints require a valid access_token cookie.

@@ -24,12 +24,27 @@ model Product {
   name        String      @unique
   description String
   imageUrl    String
+  /// Search query used by the scraper to find retailer listings.
   searchTerm  String
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   watchlist   Watchlist[]
+  listings    Listing[]
 
   @@map("products")
+}
+
+model Listing {
+  id        String   @id @default(cuid())
+  productId String
+  price     Decimal
+  retailer  String
+  url       String
+  fetchedAt DateTime
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("listings")
 }
 
 model Watchlist {
