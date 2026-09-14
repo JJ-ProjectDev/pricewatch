@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { PRICE_FETCHED_QUEUE, PRICE_QUEUE_CLIENT } from './price-queue.constants';
+import { PriceQueuePublisher } from './price-queue.publisher';
 import { RabbitMqConnectionService } from './rabbitmq-connection.service';
 
 @Module({
@@ -23,7 +24,7 @@ import { RabbitMqConnectionService } from './rabbitmq-connection.service';
       },
     ]),
   ],
-  providers: [RabbitMqConnectionService],
-  exports: [ClientsModule],
+  providers: [PriceQueuePublisher, RabbitMqConnectionService],
+  exports: [PriceQueuePublisher],
 })
 export class RabbitMqModule {}
