@@ -15,6 +15,27 @@ are intentionally not implemented yet.
 - `redis`: Redis cache
 - `rabbitmq`: RabbitMQ broker with the management UI
 
+## Design System
+
+The frontend uses a dark-only theme, no light mode.
+
+| Token              | Value     | Usage                            |
+| ------------------ | --------- | --------------------------------- |
+| Background          | `#111111` | Page background                   |
+| Card / Surface      | `#1a1a1a` | Cards, panels, elevated surfaces  |
+| Border               | `#27272a` | Dividers, card borders            |
+| Primary (emerald)    | `#10b981` | Primary actions, accents          |
+| Secondary (violet)   | `#8b5cf6` | Secondary accents                 |
+| Text — primary       | `#fafafa` | Headings, body text               |
+| Text — muted         | `#a1a1aa` | Secondary/muted text              |
+
+Colors and fonts are defined in `services/web/src/styles.css`.
+
+Fonts: DM Mono is used for headings, prices, product names, and the
+wordmark; Geist Variable is used for body text. `h1` elements pick up
+DM Mono automatically via a global base-layer rule, so no extra class
+is needed.
+
 ## Environment Variables
 
 All variables have defaults in `.env.example`. Copy it to `.env` to override locally.
@@ -220,3 +241,11 @@ entity and migration, GET /watchlist, POST /watchlist/:productId,
 DELETE /watchlist/:productId, watchlist endpoint tests, AuthContext,
 login page, register page, protected routes, WatchlistContext,
 Watch/Unwatch button, watchlist page, navbar auth states, Documentation
+
+## Iteration 7 Scope
+
+Implemented: Product detail page loading/error/not-found states, watchlist
+page empty and populated states, login and register page redesign, homepage
+redesign (hero, retailers, how it works, CTA banner), watch button
+navigation bug fix, removal of the decorative background wave, animated
+typewriter placeholder on the product search bar, Documentation
