@@ -4,7 +4,6 @@ import api from '@/lib/api'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 
-import { MOCK_PRODUCTS } from '@/lib/data/mockData'
 import ProductCard from '@/components/ui/ProductCard'
 import { motion } from 'framer-motion'
 import { ScrambleText } from '@/components/ScrambleText'
@@ -19,24 +18,20 @@ export default function WatchlistPage() {
   const [error, setError] = useState<null | string>(null)
   const [watchlistItems, setWatchlistItems] = useState<Product[]>([])
 
-  // useEffect(() => {
-  //   api
-  //     .get<Product[]>('/watchlist')
-  //     .then((response) => setWatchlistItems(response.data))
-  //     .catch((err) => {
-  //       if (axios.isAxiosError(err)) {
-  //         setError(
-  //           'Something went wrong while loading your watchlist. Please try again.'
-  //         )
-  //       } else {
-  //         setError('Something went wrong. Please try again.')
-  //       }
-  //     })
-  //     .finally(() => setIsLoading(false))
-  // }, [])
   useEffect(() => {
-    setWatchlistItems(MOCK_PRODUCTS)
-    setIsLoading(false)
+    api
+      .get<Product[]>('/watchlist')
+      .then((response) => setWatchlistItems(response.data))
+      .catch((err) => {
+        if (axios.isAxiosError(err)) {
+          setError(
+            'Something went wrong while loading your watchlist. Please try again.'
+          )
+        } else {
+          setError('Something went wrong. Please try again.')
+        }
+      })
+      .finally(() => setIsLoading(false))
   }, [])
 
   if (isLoading) {
@@ -100,4 +95,4 @@ export default function WatchlistPage() {
     </main>
   )
 }
-//TODO de-comment the api call for watchlist products
+

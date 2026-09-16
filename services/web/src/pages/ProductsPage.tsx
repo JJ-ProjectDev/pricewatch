@@ -8,12 +8,10 @@ import {
   ProductCardSkeleton,
   SkeletonBlock
 } from '@/components/ui/skeletons/ProductCardSkeleton'
-import { ArrowLeft, Link, Search, SearchX, TriangleAlert } from 'lucide-react'
+import { Search, SearchX } from 'lucide-react'
 import type { Transition } from 'framer-motion'
 import { useTypewriterPlaceholder } from '@/lib/utils/useTypewriterPlaceholder'
 
-import { MOCK_PRODUCTS } from '@/lib/data/mockData'
-import { buttonVariants } from '@/components/ui/button'
 import SomethingWentWrong from '@/components/ui/SomethingWentWrong'
 
 const container = {

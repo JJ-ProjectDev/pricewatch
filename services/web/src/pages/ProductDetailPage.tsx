@@ -16,7 +16,7 @@ import deriveCategory from '@/lib/utils/getCategory'
 // mock price until backend returns a real price field
 import { getMockPrice } from '@/lib/utils/getPrices'
 
-import { MOCK_PRODUCTS } from '@/lib/data/mockData'
+
 import SomethingWentWrong from '@/components/ui/SomethingWentWrong'
 
 export default function ProductDetailPage() {
